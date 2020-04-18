@@ -11,6 +11,8 @@ Younger are more susceptible, but it takes less time to clear
 
 Feel free to play with it :)
 
+video of the simulation: https://youtu.be/DofAXpBcgDQ
+
 Igor Jovchevski
 
 igor@edit8.com
