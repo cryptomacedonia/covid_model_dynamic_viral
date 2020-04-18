@@ -225,14 +225,14 @@ class CovidModel(Model):
             self.grid.place_agent(a, (x, y))
             self.schedule.add(a)
 
-        for i2 in range(younger):
-            a2 = HumanYoung(i2+older, self, 25)
-            a2.type = "human"
-            a2.age = 25
+        for i in range(younger):
+            a = HumanYoung(i+older, self, 25)
+            a.type = "human"
+            a.age = 25
             x = random.randrange(self.grid.width)
             y = random.randrange(self.grid.height)
-            self.grid.place_agent(a2, (x, y))
-            self.schedule.add(a2)
+            self.grid.place_agent(a, (x, y))
+            self.schedule.add(a)
         a = HumanYoung(younger+older+1, self, 25)
         a.type = "human"
         a.age = 25
