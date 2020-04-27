@@ -1,4 +1,4 @@
-# Dynamic virl model
+# Dynamic viral model
 
 Install 
 pip install -r requirements.txt
