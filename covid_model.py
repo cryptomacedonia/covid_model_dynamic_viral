@@ -55,8 +55,10 @@ def agent_portrayal(agent):
 class Human(Agent):
 
     # an agent with fixed initial wealth
-    def __init__(self, unique_id,model, person):
+    def __init__(self, unique_id,model, person,viral_decay_factor,viral_in_vivo_replication_and_age_factor,since_infection_recovery_factor):
         super().__init__(unique_id,model)
+        self.viral_in_vivo_replication_and_age_factor =  viral_in_vivo_replication_and_age_factor
+        self.viral_decay_factor = viral_decay_factor
         self.type = "human"
         self.age = person['age']
         self.time_since_infection = 0
@@ -64,6 +66,7 @@ class Human(Agent):
         self.susceptibility = 70
         self.alive =  True
         self.viral_loads = []
+        self.since_infection_recovery_factor = since_infection_recovery_factor
         self.chance_of_death = person['death_chance_percentage']
         # self.health = 100 - self.age
         self.infected = False
@@ -74,7 +77,7 @@ class Human(Agent):
             return sum 
     def viralLoadIncrease (self):
          for index, load in enumerate(self.viral_loads, start=0):
-            self.viral_loads[index] = load *  (self.age/2*(self.time_since_infection+1))
+            self.viral_loads[index] = load *  (self.age*self.viral_in_vivo_replication_and_age_factor/2*(self.time_since_infection+1))
          
     def step(self):
         if self.immune == True:
@@ -102,7 +105,7 @@ class Human(Agent):
         if viral_load>0:
             self.time_since_infection  = self.time_since_infection + 1
 
-        if self.time_since_infection >=self.age/3:
+        if self.time_since_infection >=self.age/self.since_infection_recovery_factor:
             self.infected =  False
             self.immune = True
             self.viral_loads= []
@@ -161,7 +164,7 @@ class Human(Agent):
                 
 
     def sendSignals(self,viral_load):
-        a = virion(self.model.num_agents+1, self.model,self.age)
+        a = virion(self.model.num_agents+1, self.model,self.age/5,self.viral_decay_factor)
         self.model.num_agents += 1
         a.type = "virion"
         x, y = self.pos
@@ -173,9 +176,9 @@ class Human(Agent):
 class virion(Agent):
 
     # an agent with fixed initial wealth
-    def __init__(self, unique_id, model,strength):
+    def __init__(self, unique_id, model,strength,viral_decay_factor):
         super().__init__(unique_id, model)
-       
+        self.viral_decay_factor =  viral_decay_factor
         self.strength = strength
        
         self.type = "virion"
@@ -185,7 +188,7 @@ class virion(Agent):
         self.move()
         x, y = self.pos
 
-        self.strength  = self.strength - 1
+        self.strength  = self.strength - self.viral_decay_factor
     
 
         if self.strength <= 0:
@@ -210,11 +213,21 @@ def get_infected_old(model):
 
    
     return sum
-def get_infected_all(model):
+    
+def get_infected_current(model):
     sum = 0
     for agent in model.schedule.agents:
 
         if agent.type == "human" and agent.infected == True :
+            sum = sum + 1
+
+   
+    return sum  
+def get_infected_all(model):
+    sum = 0
+    for agent in model.schedule.agents:
+
+        if agent.type == "human" and agent.time_since_infection>0  :
             sum = sum + 1
 
    
@@ -276,7 +289,7 @@ class CovidModel(Model):
         return people
 
     # Model with some number of agents
-    def __init__(self, choice_location,number_of_infected_people, number_of_people, width, height):
+    def __init__(self,since_infection_recovery_factor,viral_in_vivo_replication_and_age_factor, viral_decay_factor,choice_location,number_of_infected_people, number_of_people, width, height):
         list_data = []
         with open('./population_pyramid/'+choice_location+'.csv', newline='') as f:
             reader = csv.reader(f)
@@ -308,11 +321,11 @@ class CovidModel(Model):
         self.schedule = RandomActivation(self)
         self.grid = MultiGrid(width, height, True)
         self.datacollector = DataCollector(
-            {"deseased_all":get_deseased_all ,"infected_all":  get_infected_all
+            {"deseased_all":get_deseased_all ,"infections_current":  get_infected_current,"all_infections_including_transient":get_infected_all
              })
         # cr4eate some agents
         for i in range(len(people)):
-            a = Human(i,self,people[i])
+            a = Human(i,self,people[i],viral_decay_factor,viral_in_vivo_replication_and_age_factor,since_infection_recovery_factor)
             a.type = "human"
             x = random.randrange(self.grid.width)
             y = random.randrange(self.grid.height)
@@ -343,6 +356,14 @@ n_slider_number_of_people = UserSettableParameter(
 
 n_slider_number_of_infected_people = UserSettableParameter(
     'slider', "Number of Infected People", 3, 0, 200, 1)
+n_slider_since_infection_recovery_factor = UserSettableParameter(
+    'slider', "since_infection_recovery_factor", 1, 1, 5, 1)
+n_slider_viral_decay_factor = UserSettableParameter(
+    'slider', "viral decay", 1, 1, 5, 1)
+
+
+n_slider_viral_in_vivo_replication_and_age_factor = UserSettableParameter(
+    'slider', "in_vivo_replication_and_age_factor", 1, 1, 5, 1)
 
 
 
@@ -350,15 +371,19 @@ n_slider_number_of_infected_people = UserSettableParameter(
 chart_deseased = ChartModule([{"Label": "deseased_all",
                       "Color": "Black"}],
                     data_collector_name='datacollector')                    
-chart_all = ChartModule([{"Label": "infected_all",
+chart_current_infection = ChartModule([{"Label": "infections_current",
                       "Color": "Black"}],
-                    data_collector_name='datacollector')                
+                    data_collector_name='datacollector')       
+chart_all_infections = ChartModule([{"Label":"all_infections_including_transient",
+                      "Color": "Black"}],
+                    data_collector_name='datacollector')                                
 grid = CanvasGrid(agent_portrayal, 50, 50, 800, 800)
 
 server = ModularServer(CovidModel,
-                       [ chart_deseased,chart_all,grid ],
+                       [ chart_all_infections,chart_deseased,chart_current_infection,grid ],
                        "Covid Model",
-                       { "choice_location":choice_location, "number_of_infected_people":n_slider_number_of_infected_people,"number_of_people":n_slider_number_of_people, "width": 50, "height": 50})
+                       { "since_infection_recovery_factor":n_slider_since_infection_recovery_factor,"viral_decay_factor":n_slider_viral_decay_factor,
+                       "viral_in_vivo_replication_and_age_factor":n_slider_viral_in_vivo_replication_and_age_factor,"choice_location":choice_location, "number_of_infected_people":n_slider_number_of_infected_people,"number_of_people":n_slider_number_of_people, "width": 50, "height": 50})
 server.launch()
 
 
