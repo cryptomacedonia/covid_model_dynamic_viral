@@ -1,4 +1,4 @@
-# jovchevski_covid_model
+# Dynamic virl model
 
 Install 
 pip install -r requirements.txt
