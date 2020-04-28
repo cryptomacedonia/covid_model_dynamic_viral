@@ -1,4 +1,6 @@
 # Dynamic viral model
+Covid simulation based on MESA, easy to adapt and experiment with different strategies without programming complex agent based  systems from scratch
+
 
 Install 
 pip install -r requirements.txt
