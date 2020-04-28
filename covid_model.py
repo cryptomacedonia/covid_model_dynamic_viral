@@ -352,10 +352,10 @@ for line in file:
 choice_location = UserSettableParameter('choice', 'selected location', value='Italy-2019',
                                               choices=choices)
 n_slider_number_of_people = UserSettableParameter(
-    'slider', "Number of People", 6, 2, 500, 1)
+    'slider', "Number of People", 200, 2, 500, 1)
 
 n_slider_number_of_infected_people = UserSettableParameter(
-    'slider', "Number of Infected People", 3, 0, 200, 1)
+    'slider', "Number of Infected People", 10, 0, 200, 1)
 n_slider_since_infection_recovery_factor = UserSettableParameter(
     'slider', "since_infection_recovery_factor", 1, 1, 5, 1)
 n_slider_viral_decay_factor = UserSettableParameter(
