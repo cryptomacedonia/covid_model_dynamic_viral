@@ -4,10 +4,8 @@ Install
 pip install -r requirements.txt
 
 Based on:
-Older people are LESS susceptible to get the disease
-Once they get it, it takes much longer to clear
+infection and viral load can be transient.
 
-Younger are more susceptible, but it takes less time to clear
 
 Feel free to play with it :)
 
