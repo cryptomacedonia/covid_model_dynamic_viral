@@ -74,7 +74,7 @@ class Human(Agent):
         sum = 0
         for load in self.viral_loads:
             sum = sum + load
-        return sum
+        return sum 
 
     def viralLoadIncrease(self):
         for index, load in enumerate(self.viral_loads, start=0):
