@@ -41,9 +41,9 @@ def agent_portrayal(agent):
         portrayal["Layer"] = 0
         portrayal["r"] = agent.age/100
     if agent.type == "human" and agent.alive == False:
-        portrayal["Color"] = 'rgb(0,255,0)'
+        portrayal["Color"] = 'rgb(0,0,255)'
         portrayal["Layer"] = 0
-        portrayal["r"] = 0.001
+        portrayal["r"] = 0.8
     if agent.type == "virion":
         portrayal["Color"] = "red"
         portrayal["Layer"] = 1
@@ -74,6 +74,7 @@ class Human(Agent):
         sum = 0
         for load in self.viral_loads:
             sum = sum + load
+        # print("viral load:",sum)
         return sum 
 
     def viralLoadIncrease(self):
@@ -91,7 +92,7 @@ class Human(Agent):
         self.viralLoadIncrease()
         viral_load = self.getViralLoadSum()
 
-        if viral_load > 0:
+        if viral_load > 10:
             self.infected = True
         else:
             self.infected = False
@@ -105,9 +106,9 @@ class Human(Agent):
         if viral_load > 0:
             self.time_since_infection = self.time_since_infection + 1
 
-        if self.time_since_infection >= self.age/self.since_infection_recovery_factor:
+        if self.time_since_infection * 50 >= self.age/self.since_infection_recovery_factor:
             self.infected = False
-            self.immune = True
+            self.immune = False
             self.viral_loads = []
             self.alive = True
             self.time_since_infection = 0
@@ -122,15 +123,16 @@ class Human(Agent):
         viral_load = self.getViralLoadSum()
         rand1 = random.randrange(10000*365)
         chance1 = self.chance_of_death*10000
-        if self.infected == True and rand1 <= chance1*100 and self.alive == True:
-            self.alive = False
-            self.infected = False
-            self.viral_loads = []
+        # if self.infected == True and rand1 <= chance1*100 and self.alive == True:
+        #     self.alive = False
+        #     self.infected = False
+        #     self.viral_loads = []
             # self.model.grid._remove_agent(self.pos, self)
-            return
-
-        if viral_load >= 1000/(self.age+1) and self.alive == True:
-            self.alive == False
+            # return
+        agefactor = (35000000000 / (self.age + 1))
+        if viral_load / 100000  >= agefactor and self.alive and self.time_since_infection > 10 == True:
+            print("viral load:",viral_load,"age:",self.age , "agefactor:",agefactor)
+            self.alive = False
             self.infected = False
             self.viral_loads = []
             # self.model.grid._remove_agent(self.pos, self)
@@ -331,7 +333,7 @@ class CovidModel(Model):
             y = random.randrange(self.grid.height)
             if random.randrange(number_of_people) < number_of_infected_people:
                 a.infected = True
-                a.viral_loads = [100]
+                a.viral_loads = [10]
             self.grid.place_agent(a, (x, y))
             self.schedule.add(a)
 
