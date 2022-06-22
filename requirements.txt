@@ -16,7 +16,7 @@ MarkupSafe==1.1.1
 matplotlib==3.2.1
 Mesa==0.8.6
 networkx==2.4
-numpy==1.18.0
+numpy==1.22.0
 pandas==0.25.3
 poyo==0.5.0
 pycodestyle==2.5.0
