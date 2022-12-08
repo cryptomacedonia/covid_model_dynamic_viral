@@ -1,7 +1,7 @@
 arrow==0.15.5
 autopep8==1.5.1
 binaryornot==0.4.4
-certifi==2019.11.28
+certifi==2022.12.7
 chardet==3.0.4
 Click==7.0
 cookiecutter==1.7.0
